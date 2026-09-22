@@ -62,6 +62,12 @@ The installer embeds the app and sets up everything around it:
 launches; `--yes` makes install non-interactive (`--typesafe-key` or `$TYPESAFE_API_KEY` then
 required). Source is in `cmd/jev-runner-setup/`, stdlib only.
 
+**Building it needs Go.** Users of the app don't — the release ships binaries. The required
+version is the `go` directive in `go.mod` (currently 1.22); `scripts/build-installer.sh` and the
+release workflow both check the installed Go's major *and* minor against it and refuse to build
+with anything older. To get Go: the macOS `.pkg` from [go.dev/dl](https://go.dev/dl/) (recommended),
+`brew install go`, or unpack the tarball into `~/.local/go`.
+
 ## Develop
 
 ```

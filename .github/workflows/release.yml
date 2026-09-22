@@ -16,7 +16,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version-file: go.mod   # the go directive is the single source of truth for the version
+          check-latest: true
+      - name: Verify Go version against go.mod
+        run: |
+          REQUIRED=$(sed -n 's/^go[[:space:]]\{1,\}\([0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/p' go.mod)
+          HAVE=$(go version | sed -n 's/^go version go\([0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/p')
+          echo "go.mod requires ${REQUIRED}+, runner has ${HAVE}"
+          [ "${HAVE%%.*}" -gt "${REQUIRED%%.*}" ] || { [ "${HAVE%%.*}" -eq "${REQUIRED%%.*}" ] && [ "${HAVE#*.}" -ge "${REQUIRED#*.}" ]; }
       - name: Build both Mac architectures
         run: |
           mkdir -p dist
