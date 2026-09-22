@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Jev Runner</title>
+<style>
+  :root {
+    --bg: #fbfbfa; --fg: #1a1a1a; --muted: #6b6b6b; --line: #e3e3e0;
+    --accent: #1f5eff; --ok: #1a7f37; --warn: #b26a00; --bad: #c0392b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1c1c1e; --fg: #f2f2f2; --muted: #9a9a9a; --line: #333; --accent: #6b95ff; --ok: #4ccb6a; --warn: #f0b04a; --bad: #ff6b5b; }
+  }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+    font: 14px/1.45 -apple-system, "SF Pro Text", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { display: flex; flex-direction: column; padding: 44px 20px 16px; box-sizing: border-box; gap: 12px; }
+  .drag { position: fixed; inset: 0 0 auto 0; height: 38px; -webkit-app-region: drag; }
+  form { display: flex; gap: 8px; }
+  input {
+    flex: 1; font: inherit; font-size: 16px; padding: 10px 12px; color: var(--fg);
+    background: transparent; border: 1px solid var(--line); border-radius: 8px; outline: none;
+  }
+  input:focus { border-color: var(--accent); }
+  button {
+    font: inherit; font-weight: 600; padding: 0 18px; border: 0; border-radius: 8px;
+    background: var(--accent); color: #fff; cursor: pointer;
+  }
+  button:disabled { opacity: .5; cursor: default; }
+  #out { flex: 1; overflow: auto; font-size: 13px; color: var(--muted); white-space: pre-wrap; }
+  #out .head { color: var(--fg); font-weight: 600; }
+  #out .done { color: var(--ok); } #out .confirm, #out .unsure { color: var(--warn); }
+  #out .declined, #out .error { color: var(--bad); }
+  #out .judg { margin-top: 6px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+  <div class="drag"></div>
+  <form id="f">
+    <input id="cmd" autofocus autocomplete="off" spellcheck="false"
+           placeholder="open safari and search for cnc quoting software">
+    <button id="run" type="submit">Run</button>
+  </form>
+  <div id="out"></div>
+
+<script>
+  const f = document.getElementById("f"), cmd = document.getElementById("cmd"),
+        btn = document.getElementById("run"), out = document.getElementById("out");
+  const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  const pct = (p) => (p * 100).toFixed(0) + "%";
+
+  f.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = cmd.value.trim();
+    if (!text) return;
+    btn.disabled = true; out.textContent = "Asking Jev…";
+    const t0 = performance.now();
+    const r = await window.jev.run(text);
+    const ms = Math.round(performance.now() - t0);
+    render(r, ms);
+    btn.disabled = false;
+    if (r.status === "done") cmd.select();
+  });
+
+  function render(r, ms) {
+    const line = r.status === "done" ? r.did : r.reason;
+    let html = `<span class="head ${r.status}">${esc(r.status)}</span> · ${esc(line)}`;
+    if (r.plan) {
+      const p = r.plan;
+      const args = Object.entries(p.args).filter(([, v]) => v != null).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join("  ");
+      html += `<div class="judg">${esc(p.action)}  ${esc(args)}\n`
+            + `confidence ${pct(p.confidence)} (min over ${p.used.length} judgments)   risk ${pct(p.risk)}   ${ms} ms`
+            + (r.usage ? `   ${r.usage.input_tokens + r.usage.output_tokens} tok` : "") + `\n`
+            + p.used.map((u) => `  ${u.q.padEnd(7)} → ${u.label}  ${pct(u.p)}`).join("\n");
+      if (r.status !== "done" && r.alternatives) {
+        html += `\n  alternatives: ` + r.alternatives.map((a) => `${a.label} ${pct(a.p)}`).join(", ");
+      }
+      if (r.observed && r.observed.frontmostApp) html += `\n  saw: ${esc(r.observed.frontmostApp)} — ${esc(r.observed.windowTitle || "")}`;
+      html += `</div>`;
+    }
+    out.innerHTML = html;
+  }
+</script>
+</body>
+</html>

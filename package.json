@@ -1,0 +1,16 @@
+{
+  "name": "jev-runner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Type a command, press Run. Jev decides what it means; code does it.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^44.4.3"
+  },
+  "dependencies": {
+    "@typesafe-ai/sdk": "^0.6.0"
+  }
+}
