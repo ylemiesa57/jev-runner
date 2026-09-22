@@ -64,9 +64,11 @@ required). Source is in `cmd/jev-runner-setup/`, stdlib only.
 
 **Building it needs Go.** Users of the app don't — the release ships binaries. The required
 version is the `go` directive in `go.mod` (currently 1.22); `scripts/build-installer.sh` and the
-release workflow both check the installed Go's major *and* minor against it and refuse to build
-with anything older. To get Go: the macOS `.pkg` from [go.dev/dl](https://go.dev/dl/) (recommended),
-`brew install go`, or unpack the tarball into `~/.local/go`.
+release workflow both check the installed Go's major *and* minor against it. If Go is missing or
+too old, the build script offers to install the current stable release into `~/.local/go` — no
+sudo, nothing outside your home directory — and then builds; `--yes` (or `CI=1`) skips the
+question. Prefer your own Go? The macOS `.pkg` from [go.dev/dl](https://go.dev/dl/) or
+`brew install go` both work, as long as they're 1.22+.
 
 ## Develop
 
