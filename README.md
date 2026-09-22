@@ -3,6 +3,43 @@
 A text field and a Run button. Type what you want done on this Mac; Jev decides what
 you meant; code does it.
 
+## New here? Install it with Claude Code
+
+You need a Mac, Google Chrome, a free [TypeSafe](https://console.typesafe.ai) account for
+an API key, and [Claude Code](https://claude.com/claude-code) open in a terminal. Then:
+
+**1. Paste this into Claude Code:**
+
+```
+Install Jev Runner from https://github.com/ylemiesa57/jev-runner.
+Download the latest-release binary for my Mac (jev-runner-setup-darwin-arm64 on Apple
+silicon, -amd64 on Intel) into ~/.local/bin/jev-runner-setup using curl — not a browser,
+so Gatekeeper doesn't quarantine it — and make it executable. Don't run the installer
+yourself: I'll run it so I can type my TypeSafe API key privately. Tell me when it's
+ready, and afterwards run `jev-runner-setup doctor`, fix anything it flags, and launch
+the app with `jev-runner`.
+```
+
+**2. When Claude says it's ready, type this in Claude Code** (the `!` runs it in your own
+terminal, so the key prompt is hidden and never enters the conversation):
+
+```
+! ~/.local/bin/jev-runner-setup install
+```
+
+It finds or downloads Node, unpacks the app, asks for your TypeSafe key and checks it
+against the API, installs browser-harness, and connects to Chrome. Two things it may ask
+you to do by hand, once: tick the box at `chrome://inspect/#remote-debugging` in Chrome,
+and grant Accessibility to your terminal (System Settings → Privacy & Security) if you
+want it to click and type in native Mac apps.
+
+**3. Type `jev-runner`** — a small window with a text field appears. Try
+`open spotify`, `search for cnc quoting software in chrome`, or, with a page open,
+`click the sign in link`.
+
+Don't have Claude Code? The same thing without it:
+`curl -fsSL https://raw.githubusercontent.com/ylemiesa57/jev-runner/main/install.sh | sh`
+
 ## Install (single binary)
 
 ```
